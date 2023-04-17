@@ -1,16 +1,5 @@
 import pandas as pd
-import category_encoders as ce
-import tensorflow as tf
-from keras.layers import Input, InputLayer
-from keras.layers import Dense
-from keras.layers import BatchNormalization
-from keras.models import Sequential
-from keras import backend as K
-from keras import Model
 import numpy as np
-import matplotlib.pyplot as plt
-import seaborn as sns
-import tensorflow_probability as tfp
 from ctgan import CTGAN
 from sklearn.impute import SimpleImputer
 
@@ -129,6 +118,11 @@ df.loc[df['hop 2 phase'].str.startswith('Dry Hop'), 'hop 2 phase'] = 'Dry Hop'
 df.loc[df['hop 3 phase'].str.startswith('Dry Hop'), 'hop 3 phase'] = 'Dry Hop'
 df.loc[df['hop 4 phase'].str.startswith('Dry Hop'), 'hop 4 phase'] = 'Dry Hop'
 
+df.loc[df['hop 1 phase'].str.startswith('Hopback'), 'hop 1 phase'] = 'Hopback'
+df.loc[df['hop 2 phase'].str.startswith('Hopback'), 'hop 2 phase'] = 'Hopback'
+df.loc[df['hop 3 phase'].str.startswith('Hopback'), 'hop 3 phase'] = 'Hopback'
+df.loc[df['hop 4 phase'].str.startswith('Hopback'), 'hop 4 phase'] = 'Hopback'
+
 df['hop 1 time'] = df['hop 1 time'].apply(lambda x: x[:-4].strip())
 df['hop 2 time'] = df['hop 2 time'].apply(lambda x: x[:-4].strip())
 df['hop 3 time'] = df['hop 3 time'].apply(lambda x: x[:-4].strip())
@@ -153,8 +147,8 @@ df['fermentable 3 name'] = df['fermentables'].apply(lambda x: fermentable_name(x
 df['fermentable 4 weight'] = df['fermentables'].apply(lambda x: fermentable_weight(x, 3))
 df['fermentable 4 name'] = df['fermentables'].apply(lambda x: fermentable_name(x, 3))
 
-df['fermentable 5 weight'] = df['fermentables'].apply(lambda x: fermentable_weight(x, 5))
-df['fermentable 5 name'] = df['fermentables'].apply(lambda x: fermentable_name(x, 5))
+df['fermentable 5 weight'] = df['fermentables'].apply(lambda x: fermentable_weight(x, 4))
+df['fermentable 5 name'] = df['fermentables'].apply(lambda x: fermentable_name(x, 4))
 
 df = df.drop(['hops','fermentables','method'], axis = 1)
 
@@ -206,10 +200,10 @@ df['hop 4 time'] = df['hop 4 time'].astype(float)
 
 df['yeast'] = df['yeast'].astype(str)
 
-ctgan = CTGAN(epochs=40, cuda=True, verbose=True)
+ctgan = CTGAN(epochs=25, cuda=True, verbose=True)
 ctgan.fit(df, discrete_columns)
 
 # Create synthetic data
-synthetic_data = ctgan.sample(10)
-synthetic_data.to_csv('./synthetic_recipes_40_epochs.csv')
+synthetic_data = ctgan.sample(20)
+synthetic_data.to_csv('./synthetic_recipes_25_epochs.csv')
 print(synthetic_data)
